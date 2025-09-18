@@ -27,6 +27,9 @@ namespace Devden.STT
         private string DefinedWords = "Hello and welcometo AbuDhabi Customs We are here to assist and support our community Our authority is to ban and block bad business Our job is to assess all goods and ban anything illegal We support a secure future for this area";
         private Dictionary<string, float> AnimationClipLength = new Dictionary<string, float>();
         private Coroutine animationCoroutine;
+        [SerializeField, Range(0.1f, 3f)]
+        private float animationSpeed;
+
         private void Start()
         {
             TranscriptionHandler.SetGameObjectName(transform.gameObject.name);
@@ -40,6 +43,7 @@ namespace Devden.STT
                     AnimationClipLength.Add(clip.name.ToLower(), clip.length);
                 }
             }
+            characterAnimator.speed = animationSpeed;
         }
         public void StartListening()
         {
@@ -130,8 +134,8 @@ namespace Devden.STT
                     string animationName = wordAnimations[word];
                     characterAnimator.CrossFade(animationName,( 0.1f));
                     Debug.Log($"Playing word animation '{animationName}' for: {word}");
-                    //yield return new WaitForSeconds(AnimationClipLength[word]);
-                    yield return new WaitForSeconds(3f);
+                    yield return new WaitForSeconds(AnimationClipLength[animationName] / animationSpeed);
+                    //yield return new WaitForSeconds(3f);
                 }
                 else
                 {
@@ -154,7 +158,6 @@ namespace Devden.STT
                 //yield return new WaitForSeconds(AnimationClipLength[animationName]);
                 yield return new WaitForSeconds(3f);
             }
-
             characterAnimator.CrossFade("idle", 0.2f);
         }
 

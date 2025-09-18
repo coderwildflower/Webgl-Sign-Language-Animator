@@ -106,6 +106,16 @@
         }).then((unityInstance) => {
           loadingBar.style.display = "none";
           Gameinstance =unityInstance;
+
+          // ✅ Listen for messages from parent iframe
+          window.addEventListener("message", (event) => {
+              const msg = event.data;
+              if (msg.type === "callUnity" && window.unityInstance) {
+                  window.unityInstance.SendMessage("WebController", msg.method, msg.param || "");
+              }
+          });
+
+
 		  window.unityInstance=unityInstance;
           fullscreenButton.onclick = () => {
             unityInstance.SetFullscreen(1);
@@ -115,6 +125,9 @@
         });
       };
       document.body.appendChild(script);
+
+
+      
     </script>
   </body>
 </html>
