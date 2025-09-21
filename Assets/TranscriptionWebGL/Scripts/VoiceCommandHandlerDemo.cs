@@ -26,6 +26,7 @@ namespace Devden.STT
         private Dictionary<string, string> wordAnimations = new Dictionary<string, string>();
         private string DefinedWords = "Hello and welcometo AbuDhabi Customs We are here to assist and support our community Our authority is to ban and block bad business Our job is to assess all goods and ban anything illegal We support a secure future for this area";
         private Dictionary<string, float> AnimationClipLength = new Dictionary<string, float>();
+        private Dictionary<string, string> AnimationTriggers = new Dictionary<string, string>();
         private Coroutine animationCoroutine;
         [SerializeField, Range(0.1f, 3f)]
         private float animationSpeed;
@@ -35,15 +36,11 @@ namespace Devden.STT
             TranscriptionHandler.SetGameObjectName(transform.gameObject.name);
 
             InitializeWordAnimations();
+            InitializeAnimationClip();
+            InitializeTriggerNames();
 
-            foreach (var clip in characterAnimator.runtimeAnimatorController.animationClips)
-            {
-                if (!AnimationClipLength.ContainsKey(clip.name))
-                {
-                    AnimationClipLength.Add(clip.name.ToLower(), clip.length);
-                }
-            }
             characterAnimator.speed = animationSpeed;
+
         }
         public void StartListening()
         {
@@ -53,7 +50,6 @@ namespace Devden.STT
         public void StopListening()
         {
             TranscriptionHandler.StopRecognition();
-          
         }
 
         //Receives result from speech recognition, use the same function name in case it needs to be used elsewhere.
@@ -74,6 +70,25 @@ namespace Devden.STT
                 {
                     wordAnimations.Add(word, $"{word}");
                 }
+            }
+        }
+
+        private void InitializeAnimationClip()
+        {
+            foreach (var clip in characterAnimator.runtimeAnimatorController.animationClips)
+            {
+                if (!AnimationClipLength.ContainsKey(clip.name))
+                {
+                    AnimationClipLength.Add(clip.name, clip.length);
+                }
+            }
+        }
+
+        private void InitializeTriggerNames()
+        {
+            for (char i = 'A'; i < 'Z'; i++)
+            {
+                AnimationTriggers.Add(i.ToString(), "Play_" + i);
             }
         }
 
@@ -122,7 +137,6 @@ namespace Devden.STT
             animationCoroutine = StartCoroutine(ProcessWordsCoroutine(words));
         }
 
-
         private IEnumerator ProcessWordsCoroutine(string[] words)
         {
             foreach (string word in words)
@@ -132,10 +146,10 @@ namespace Devden.STT
                 if (wordAnimations.ContainsKey(word))
                 {
                     string animationName = wordAnimations[word];
-                    characterAnimator.CrossFade(animationName,( 0.1f));
+                    characterAnimator.CrossFade(animationName, (0.1f));
                     Debug.Log($"Playing word animation '{animationName}' for: {word}");
-                    yield return new WaitForSeconds(AnimationClipLength[animationName] / animationSpeed);
-                    //yield return new WaitForSeconds(3f);
+                    yield return new WaitForSeconds((AnimationClipLength[animationName]/ animationSpeed) - 0.1f);
+                  
                 }
                 else
                 {
@@ -144,7 +158,7 @@ namespace Devden.STT
                 }
             }
 
-            characterAnimator.CrossFade("idle", 0.2f);
+            characterAnimator.CrossFade("idle", 0.1f);
         }
 
         private IEnumerator AnimateWordLettersCoroutine(string word)
@@ -152,13 +166,15 @@ namespace Devden.STT
             foreach (char c in word)
             {
                 char upperChar = char.ToUpper(c);
+
                 string animationName = upperChar.ToString();
-                Debug.Log(upperChar + " :Capital Letter Anim Word");
-                characterAnimator.CrossFade(animationName,0.1f);
-                //yield return new WaitForSeconds(AnimationClipLength[animationName]);
-                yield return new WaitForSeconds(3f);
+
+                characterAnimator.SetTrigger(AnimationTriggers[animationName]);
+
+                float clipLength = AnimationClipLength[animationName] / animationSpeed;
+                yield return new WaitForSeconds(clipLength - 1.2f);
             }
-            characterAnimator.CrossFade("idle", 0.2f);
+            characterAnimator.CrossFade("idle", 0.03f);
         }
 
         private float CalculateSimilarity(string source, string target)
