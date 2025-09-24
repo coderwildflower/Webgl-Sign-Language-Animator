@@ -2,7 +2,7 @@ using UnityEngine;
 using TMPro;
 using Devden.STT;
 
-public class WebGLMessageReceiver : MonoBehaviour
+public class WebBridge : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI debugText;
     [SerializeField] private VoiceCommandHandlerDemo voiceCommandHandlerDemo;
@@ -17,6 +17,6 @@ public class WebGLMessageReceiver : MonoBehaviour
         Debug.Log("Message from parent: " + msg);
         if (debugText != null)
             debugText.text = "Received: " + msg;
-        //voiceCommandHandlerDemo.StartListening();
+        voiceCommandHandlerDemo.StartListening();
     }
 }
