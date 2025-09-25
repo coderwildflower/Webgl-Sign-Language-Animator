@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -24,15 +24,53 @@ namespace Devden.STT
         [SerializeField] private Toggle listenContinuously;
 
         private Dictionary<string, string> wordAnimations = new Dictionary<string, string>();
-        private string DefinedWords = "Hello and welcometo AbuDhabi Customs We are here to assist and support our community Our authority is to ban and block bad business Our job is to assess all goods and ban anything illegal We support a secure future for this area";
+        private string DefinedWords = "Hello and welcometo AbuDhabi Customs We are here to assist and support our community Our authority is to ban and block bad business Our job is to assess all goods and ban anything illegal We support secure future for this area";
         private Dictionary<string, float> AnimationClipLength = new Dictionary<string, float>();
-        private Dictionary<string, string> AnimationTriggers = new Dictionary<string, string>();
+        private Dictionary<string, string> AnimationTriggers = new Dictionary<string, string>() { 
+         {"ا", "Play_Alif"},
+        {"ب", "Play_Baa"},
+        {"ت", "Play_Taa"},
+        {"ث", "Play_Saa"},
+        {"ج", "Play_Jeem"},
+        {"ح", "Play_Haa"},
+        {"خ", "Play_Khaa"},
+        {"د", "Play_Daal"},
+        {"ذ", "Play_Zaal"},
+        {"ر", "Play_Raa"},
+        {"ز", "Play_Zaai"},
+        {"س", "Play_Seen"},
+        {"ش", "Play_Sheen"},
+        {"ص", "Play_Saad"},
+        {"ض", "Play_Daad"},
+        {"ط", "Play_Tua"},
+        {"ظ", "Play_Zua"},
+        {"ع", "Play_Aeen"},
+        {"غ", "Play_Gaen"},
+        {"ف", "Play_Faa"},
+        {"ق", "Play_Qaaf"},
+        {"ك", "Play_Kaaf"},
+        {"ل", "Play_Laam"},
+        {"م", "Play_Meem"},
+        {"ن", "Play_Noon"},
+        {"ه", "Play_Ha"},
+        {"و", "Play_Waw"},
+        {"ي", "Play_Yaa"},
+        {"ة", "Play_Ta"},
+        {"پ", "Play_Hamza_Yaa"},
+        {"چ", "Play_Hamza_Nabira"},
+        {"ژ", "Play_Hamza_Satr"},
+        {"گ", "Play_Hamza_Wow"},
+        {"ڤ", "Play_AI"},
+        {"ڈ", "Play_Laa"},
+        };
+
         private Coroutine animationCoroutine;
         [SerializeField, Range(0.1f, 3f)]
         private float animationSpeed;
-
         private void Start()
         {
+            WebBridge.OnMessageReceived += Result;
+
             TranscriptionHandler.SetGameObjectName(transform.gameObject.name);
 
             InitializeWordAnimations();
@@ -99,6 +137,7 @@ namespace Devden.STT
             return System.Text.RegularExpressions.Regex.Replace(textinput.ToLower().Trim(), @"[^\w\s]", "")
                    .Trim();
         }
+
         private void CheckPhraseMatch(string recognizedText)
         {
             if (string.IsNullOrEmpty(recognizedText)) return;
@@ -125,7 +164,6 @@ namespace Devden.STT
                 }
             }
 
-            Debug.Log($"No matching phrase found for: {recognizedText}");
             ProcessWordsIndividually(cleanedRecognizedText);
 
         }
@@ -147,13 +185,11 @@ namespace Devden.STT
                 {
                     string animationName = wordAnimations[word];
                     characterAnimator.CrossFade(animationName, (0.1f));
-                    Debug.Log($"Playing word animation '{animationName}' for: {word}");
                     yield return new WaitForSeconds((AnimationClipLength[animationName]/ animationSpeed) - 0.1f);
                   
                 }
                 else
                 {
-                    Debug.Log($"No word animation found for: {word}. Breaking into letters.");
                     yield return StartCoroutine(AnimateWordLettersCoroutine(word));
                 }
             }
@@ -225,8 +261,6 @@ namespace Devden.STT
             if (characterAnimator != null && !string.IsNullOrEmpty(animationName))
             {
                 characterAnimator.SetTrigger(animationName);
-                Debug.Log($"Playing animation '{animationName}' for phrase: {matchedPhrase}");
-
             }
         }
     }
